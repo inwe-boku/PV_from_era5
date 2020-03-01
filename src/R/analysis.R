@@ -1,5 +1,6 @@
 library(tidyverse)
 library(irenabpdata)
+library(feather)
 
 t1<-read_csv("../../results/tables/indicators_deseasonalized_era5land_and_rn.csv") %>% 
   mutate(Type = "deseasonalized") %>% 
@@ -9,7 +10,7 @@ t1<-read_csv("../../results/tables/indicators_deseasonalized_era5land_and_rn.csv
   mutate(Indicator = str_replace(Indicator, "_era5", "")) %>% 
   mutate(Indicator = str_replace(Indicator, "_rn", "")) %>% 
   dplyr::select(X1, Type, Source, Indicator, Value) 
-  
+
 
 names(t1)[1]<-"Installation"
 
@@ -53,7 +54,7 @@ final_tab_join<-full_join(final_tab, t4, by=c("Installation" = "NOMBRE")) %>%
   mutate(Set = ifelse(Set == "subset_1", "S1", Set)) %>% 
   mutate(Set = ifelse(Set == "subset_2", "S2", Set)) %>% 
   mutate(Set = ifelse(Set == "all", "All", Set))
-  
+
 
 write_csv(final_tab_join, "../../results/tables/all_indicators_with_sets.csv")
 
@@ -62,7 +63,7 @@ theme_set(theme_classic(base_size = 14))
 ### full and deseasonalized
 
 final_tab_join %>% 
-#  filter(Indicator == "mbe") %>% 
+  #  filter(Indicator == "mbe") %>% 
   filter(Type == "Raw") %>% 
   filter(Indicator %in% c("pearson", "rmse")) %>% 
   ggplot(aes(x = Set, y = Value)) +
@@ -123,9 +124,10 @@ ggsave("../../results/figures/rmse_raw.png")
 
 dim(ts)
 
-ts<-read_csv("../../results/figures/pv_cf_reference_chile.csv", col_types = paste0(c("?", rep("d", 57)),collapse=""))
-names(ts)[1]<-"Time"
-ts<-ts %>% gather(Location, Capacity_Factor, -Time)
+ts_reference<-read_csv("../../results/tables/pv_cf_reference_chile.csv", col_types = paste0(c("?", rep("d", 57)),collapse=""))
+names(ts_reference)[1]<-"Timestamp"
+ts_reference<-ts_reference %>% gather(Location, Capacity_Factor, -Timestamp) %>% 
+  mutate(Source = "Reference")
 
 # Figure1
 #start = "2016-01-01"
@@ -134,11 +136,11 @@ ts<-ts %>% gather(Location, Capacity_Factor, -Time)
 
 library(lubridate)
 
-ts %>% 
+ts_reference %>% 
   filter(Location == "BELLAVISTA") %>% 
-  filter(Time > ymd_hm("2016-01-01 23:00")) %>% 
-  filter(Time < ymd_hm("2019-01-01 00:00")) %>% 
-  ggplot(aes(x = Time, y = Capacity_Factor)) + 
+  filter(Timestamp > ymd_hm("2016-01-01 23:00")) %>% 
+  filter(Timestamp < ymd_hm("2019-01-01 00:00")) %>% 
+  ggplot(aes(x = Timestamp, y = Capacity_Factor)) + 
   geom_line(col=COLORS3[2]) + 
   ylab("Capacity Factor")
 
@@ -151,16 +153,107 @@ ggsave("../../results/figures/BELLAVISTA.png")
 #ende = "2018-01-07"
 #8lant = "PUERTO SECO SOLAR"
 
-ts %>% 
+ts_reference %>% 
   mutate(Capacity_Factor = ifelse(is.na(Capacity_Factor), 0, Capacity_Factor)) %>% 
   filter(Location == "PUERTO SECO SOLAR") %>% 
-  filter(Time > ymd_hm("2017-12-31 23:00")) %>% 
-  filter(Time < ymd_hm("2018-01-08 00:00")) %>% 
-  ggplot(aes(x = Time, y = Capacity_Factor)) + 
+  filter(Timestamp > ymd_hm("2017-12-31 23:00")) %>% 
+  filter(Timestamp < ymd_hm("2018-01-08 00:00")) %>% 
+  ggplot(aes(x = Timestamp, y = Capacity_Factor)) + 
   geom_line(fill=COLORS3[2], size=1) + 
   ylab("Capacity Factor")
 
 ggsave("../../results/figures/PUERTO SECO SOLAR.png")
+
+ts_era5<-read_csv("../../results/tables/pv_cf_era5land_chile.csv") %>% 
+  gather(Location, Capacity_Factor, -X1) %>% 
+  mutate(Source = "ERA5_Land")
+names(ts_era5)[1]<-"Timestampe"
+
+
+ts_rn<-read_csv("../../results/tables/pv_cf_rn_chile.csv") %>% 
+  gather(Location, Capacity_Factor, -X1) %>% 
+  mutate(Source = "RN")
+names(ts_rn)[1]<-"Timestamp"
+
+
+all_capacity_factors<-bind_rows(ts_reference,
+                                ts_era5,
+                                ts_rn)
+
+all_capacity_factors %>% spread(Location, Capacity_Factor) %>% 
+  write_csv("../../results/tables/all_capacity_factors.csv")
+
+all_capacity_factors %>% 
+  filter(Location == "SPS LA HUAYCA") %>% 
+  filter(Timestamp > ymd_hm("2017-05-31 23:00")) %>% 
+  filter(Timestamp < ymd_hm("2017-06-08 00:00")) %>% 
+  ggplot(aes(x = Timestamp, y = Capacity_Factor)) + 
+  geom_line(aes(col = Source), size = 1) +
+  scale_color_manual(values = COLORS3)
+
+ggsave("../../results/figures/comparison_SPS_LA_huayca.png")
+
+
+all_capacity_factors %>% 
+  filter(Location == "SPS LA HUAYCA") %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference) %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_point(aes(col = Simulation), size = 1) +
+  scale_color_manual(values = COLORS3) +
+  geom_abline(size = 2, slope = 1)
+
+ggsave("../../results/figures/comparison_scatter_SPS_LA_huayca.png")
+
+all_capacity_factors %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference) %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_bin2d() +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[2], high = COLORS3[3]) +
+  facet_wrap(.~Simulation)
+
+ggsave("../../results/figures/comparison_all_density.png")
+
+all_capacity_factors_join <-full_join(all_capacity_factors, t4, by=c("Location" = "NOMBRE")) %>% 
+  mutate(Set = set) %>% 
+  dplyr::select(-set)
+
+all_capacity_factors_join %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_bin2d(binwidth = c(0.1, 0.1), bins = 100) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[2]) +
+  facet_wrap(.~Simulation + Set) +
+  xlab("Capacity Factor Reference") +
+  ylab("Capacity Factor Simulation")
+
+ggsave("../../results/figures/comparison_all_density.png")
+
+all_capacity_factors_join %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
+  mutate(Error = Reference - Capacity_Factor) %>% 
+  ggplot(aes(x = Reference, y = Error)) + 
+  geom_bin2d(binwidth = c(0.1, 0.1), bins = 100) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[2]) +
+  facet_wrap(.~Simulation + Set) +
+  xlab("Capacity Factor Reference") +
+  ylab("Error Capacity Factor Simulation")
+
+ggsave("../../results/figures/comparison_error_all_density.png")
 
 
 
