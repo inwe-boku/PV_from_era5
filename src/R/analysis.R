@@ -1,6 +1,8 @@
 library(tidyverse)
 library(irenabpdata)
 library(feather)
+library(lubridate)
+
 
 t1<-read_csv("../../results/tables/indicators_deseasonalized_era5land_and_rn.csv") %>% 
   mutate(Type = "deseasonalized") %>% 
@@ -101,7 +103,7 @@ ggsave("../../results/figures/mbe_raw.png")
 
 
 final_tab_join %>% 
-  filter(Indicator == "pearson_raw") %>% 
+  filter(Indicator == "pearson") %>% 
   filter(Type == "Raw") %>% 
   ggplot(aes(x = Set, y = Value)) +
   geom_boxplot(aes(fill = Source, )) +
@@ -134,7 +136,6 @@ ts_reference<-ts_reference %>% gather(Location, Capacity_Factor, -Timestamp) %>%
 #ende = "2018-12-31"
 #plant = "BELLAVISTA"
 
-library(lubridate)
 
 ts_reference %>% 
   filter(Location == "BELLAVISTA") %>% 
@@ -167,7 +168,7 @@ ggsave("../../results/figures/PUERTO SECO SOLAR.png")
 ts_era5<-read_csv("../../results/tables/pv_cf_era5land_chile.csv") %>% 
   gather(Location, Capacity_Factor, -X1) %>% 
   mutate(Source = "ERA5_Land")
-names(ts_era5)[1]<-"Timestampe"
+names(ts_era5)[1]<-"Timestamp"
 
 
 ts_rn<-read_csv("../../results/tables/pv_cf_rn_chile.csv") %>% 
@@ -213,9 +214,9 @@ all_capacity_factors %>%
   spread(Source, Capacity_Factor) %>% 
   gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference) %>% 
   ggplot(aes(x = Reference, y = Capacity_Factor)) + 
-  geom_bin2d() +
+  geom_bin2d(binwidth = c(0.1, 0.1), bins = 100) +
   #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
-  scale_fill_gradient(low = COLORS3[2], high = COLORS3[3]) +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
   facet_wrap(.~Simulation)
 
 ggsave("../../results/figures/comparison_all_density.png")
@@ -230,14 +231,14 @@ all_capacity_factors_join %>%
   spread(Source, Capacity_Factor) %>% 
   gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
   ggplot(aes(x = Reference, y = Capacity_Factor)) + 
-  geom_bin2d(binwidth = c(0.1, 0.1), bins = 100) +
+  geom_bin2d(binwidth = c(0.2, 0.2), bins = 10) +
   #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
-  scale_fill_gradient(low = COLORS3[3], high = COLORS3[2]) +
-  facet_wrap(.~Simulation + Set) +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
+  facet_wrap(.~Simulation + Set, scales ="free") +
   xlab("Capacity Factor Reference") +
   ylab("Capacity Factor Simulation")
 
-ggsave("../../results/figures/comparison_all_density.png")
+ggsave("../../results/figures/comparison_all_density_by_set.png")
 
 all_capacity_factors_join %>% 
   mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
@@ -248,13 +249,58 @@ all_capacity_factors_join %>%
   ggplot(aes(x = Reference, y = Error)) + 
   geom_bin2d(binwidth = c(0.1, 0.1), bins = 100) +
   #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
-  scale_fill_gradient(low = COLORS3[3], high = COLORS3[2]) +
-  facet_wrap(.~Simulation + Set) +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
+  facet_wrap(.~Simulation + Set, scales = "free") +
   xlab("Capacity Factor Reference") +
   ylab("Error Capacity Factor Simulation")
 
 ggsave("../../results/figures/comparison_error_all_density.png")
 
 
+all_capacity_factors_join %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
+  filter(Set == "all") %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_bin2d(binwidth = c(0.2, 0.2), bins = 10) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
+  facet_wrap(.~Simulation + Set, scales ="free") +
+  xlab("Capacity Factor Reference") +
+  ylab("Capacity Factor Simulation")
 
+ggsave("../../results/figures/comparison_all_density_set_all.png")
 
+all_capacity_factors_join %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
+  filter(Set == "subset_1") %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_bin2d(binwidth = c(0.2, 0.2), bins = 10) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
+  facet_wrap(.~Simulation + Set, scales ="free") +
+  xlab("Capacity Factor Reference") +
+  ylab("Capacity Factor Simulation")
+
+ggsave("../../results/figures/comparison_all_density_set_S1.png")
+
+all_capacity_factors_join %>% 
+  mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
+  na.omit() %>%
+  spread(Source, Capacity_Factor) %>% 
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
+  filter(Set == "subset_2") %>% 
+  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
+  geom_bin2d(binwidth = c(0.2, 0.2), bins = 10) +
+  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
+  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
+  facet_wrap(.~Simulation + Set, scales ="free") +
+  xlab("Capacity Factor Reference") +
+  ylab("Capacity Factor Simulation")
+
+ggsave("../../results/figures/comparison_all_density_set_S2.png")
