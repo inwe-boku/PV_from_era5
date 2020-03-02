@@ -79,14 +79,25 @@ final_tab_join %>%
   #  filter(Indicator == "mbe") %>% 
   filter(Type == "deseasonalized") %>% 
   filter(Indicator %in% c("pearson", "rmse")) %>% 
-  filter(Indicator %in% c("pearson", "rmse")) %>% 
+  #filter(Indicator %in% c("pearson", "rmse")) %>% 
   ggplot(aes(x = Set, y = Value)) +
   geom_boxplot(aes(fill = Source, )) +
   facet_wrap(.~Resolution + Indicator, nrow = 3, scale = "free") +
   scale_fill_manual(values=COLORS3) 
 
-ggsave("../../results/figures/all_deseasonalized.png")
+ggsave("../../results/figures/S2_deseasonalized_pearson_rmse.png")
 
+final_tab_join %>% 
+  filter(Indicator == "mbe") %>% 
+  filter(Type == "deseasonalized") %>% 
+  #filter(Indicator %in% c("pearson", "rmse")) %>% 
+  #filter(Indicator %in% c("pearson", "rmse")) %>% 
+  ggplot(aes(x = Set, y = Value)) +
+  geom_boxplot(aes(fill = Source, )) +
+  facet_wrap(.~Resolution + Indicator, nrow = 3, scale = "free") +
+  scale_fill_manual(values=COLORS3) 
+
+ggsave("../../results/figures/S2_deseasonalized_pearson_mbe.png")
 
 
 ### single indicators full
