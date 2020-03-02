@@ -289,18 +289,31 @@ all_capacity_factors_join %>%
 
 ggsave("../../results/figures/comparison_all_density_set_S1.png")
 
-all_capacity_factors_join %>% 
+tt<-all_capacity_factors_join %>% 
   mutate(Capacity_Factor = ifelse(Capacity_Factor == 0, NA, Capacity_Factor)) %>% 
   na.omit() %>%
   spread(Source, Capacity_Factor) %>% 
-  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set) %>% 
-  filter(Set == "subset_2") %>% 
-  ggplot(aes(x = Reference, y = Capacity_Factor)) + 
-  geom_bin2d(binwidth = c(0.2, 0.2), bins = 10) +
-  #stat_density_2d(aes(fill = ..level..), geom = "polygon", colour="white") +
-  scale_fill_gradient(low = COLORS3[3], high = COLORS3[1]) +
-  facet_wrap(.~Simulation + Set, scales ="free") +
-  xlab("Capacity Factor Reference") +
-  ylab("Capacity Factor Simulation")
+  gather(Simulation, Capacity_Factor, -Timestamp, -Location, -Reference, -Set)
 
-ggsave("../../results/figures/comparison_all_density_set_S2.png")
+grp <- cut(tt$Reference, breaks=hist(tt$Reference, breaks = 5)$breaks)
+
+ts_data_bins<-tt %>% mutate(Group = grp)
+
+ts_data_bins %>% 
+  filter(Set == "subset_2") %>% 
+  na.omit() %>% 
+  ggplot(aes(x = Group, y = Capacity_Factor)) + 
+  geom_violin(aes(fill = Simulation)) +
+  scale_fill_manual(values = COLORS3) +
+  geom_line(data=tibble(x = c(0.5, 1.5), y = c(0.2, 0.2)),aes(x = x, y = y), linetype = 2) +
+  geom_line(data=tibble(x = c(1.5, 2.5), y = c(0.4, 0.4)),aes(x = x, y = y), linetype = 2) +
+  geom_line(data=tibble(x = c(2.5, 3.5), y = c(0.6, 0.6)),aes(x = x, y = y), linetype = 2) +
+  geom_line(data=tibble(x = c(3.5, 4.5), y = c(0.8, 0.8)),aes(x = x, y = y), linetype = 2) +
+  geom_line(data=tibble(x = c(4.5, 5.5), y = c(1, 1)),aes(x = x, y = y), linetype = 2)
+
+ggsave("../../results/figures/violins.png")
+
+
+
+
+
