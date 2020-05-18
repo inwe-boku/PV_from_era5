@@ -7,10 +7,10 @@ c.retrieve(
     'reanalysis-era5-land',
     {
         'variable':[
-            '2m_temperature','forecast_albedo','surface_solar_radiation_downwards'
+            '10m_u_component_of_wind','10m_v_component_of_wind','2m_temperature','surface_solar_radiation_downwards'
         ],
-        'year':'2001',
-        'month':'02',
+        'year':'2018',
+        'month':['07','08','09','10','11','12'],
         'day':[
             '01','02','03',
             '04','05','06',
@@ -36,4 +36,4 @@ c.retrieve(
         ],
         'format':'grib'
     },
-    'download.grib')
+    'download_2018_07_12_right.grib')
