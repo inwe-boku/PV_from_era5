@@ -1,4 +1,4 @@
-# PV_from_era5
+# Simulation of multi-annual time series of solar photovoltaic power: is the ERA5-land reanalysis the next big step? 
 This repository contains the scripts necesary to calculate PV electricity generation from ERA5-land data and for the validation against meassured PV output data. The code is split in two parts:
 
 ## Python: Download of reanalysis data, simualtion of PV timeseries, and calculation of simulation quality indicators
