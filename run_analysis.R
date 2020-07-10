@@ -4,16 +4,15 @@ library(lubridate)
 library(dtw)
 
 
-### visual appearance of plots
+#### visual appearance of plots
 theme_set(theme_classic(base_size = 14))
 
-
+#### Load data and functions
 source("src/R/load_data.R")
 source("src/R/functions-era5l-merra2.R")
 
 
-#### Paper section 2.1.1: 2.1.1.	Classifying generation profiles of large PV installations in Chile
-
+#### Section 2.1.1: Classifying generation profiles of large PV installations in Chile
 
 # Find erroneous data
 erroneous <- find_erroneous(capacity_factors_subset)
@@ -30,15 +29,11 @@ erroneous <- c(
   "LAS ARAUCARIAS",
   "SOLAR ESPERANZA",
   "SOLAR CHUCHINI",
-  #"SOLAR HORMIGA",
-  #"SOLAR EL AGUILA I",
   "SOLAR ANTAY"
 )
 
 erroneous <- erroneous %>% unique()
 
-
-#13
 plot_classification_procedure(ts, erroneous[2])
 ggsave("results/figures/Figure-2.png")
 
@@ -55,6 +50,7 @@ ggsave("results/figures/Figure-3.png")
 selection %>% group_by(Type) %>% summarize(s = n())
 
 #### Section 3.1: Raw timeseries
+
 final_tab_join <- load_indicators(selection = selection)
 boxplot_comparisons(final_tab_join,
                     "results/figures/Figure-4.png",
@@ -68,8 +64,6 @@ boxplot_comparisons(final_tab_join,
                     c("tracking", "fixed"),
                     c("mbe"),
                     c("Hourly"))
-
-
 
 #### Section 3.2: Deseasonalized timeseries
 
@@ -112,8 +106,8 @@ density_plot(files,
 
 ##### 3.4 Understanding simulation quality
 
+## Relationship between mean capacity factor and simulation quality
 mean_cor_joined <- calculate_capacity_factor_simulation_quality()
-
 
 mean_cor_joined %>%
   ggplot(aes(x = mean_cap, y = Value)) +
@@ -127,18 +121,17 @@ ggsave("Figure-8.png")
 
 mean_cor_joined %>%
   filter(Set != "erroneous") %>%
-  filter(Installation != name) %>%
   group_by(Set) %>%
   summarize(cor = cor(mean_cap, Value))
 
-####check if removal of 1 element changes correlations for fixed installations
+# Check if removal of 1 element changes correlations for fixed installations
 correlations_one_out <- correlation_one_out_mean("fixed",
                                                  mean_cor_joined)
 
 correlations_one_out %>%
   ggplot(aes(x = Name, y = Cor)) + geom_bar(stat = "identity")
 
-####check if removal of 1 element changes correlations for fixed installations
+# Check if removal of 1 element changes correlations for fixed installations
 correlations_one_out <- correlation_one_out_mean("tracking",
                                                  mean_cor_joined)
 
@@ -147,7 +140,8 @@ correlations_one_out %>%
 
 
 
-#####
+## Relationship between difference between clear sky and era5 irradiation on surface and simulation quality
+
 mean_cor_joined <- calculate_irr_diff_factor_simulation_quality()
 
 mean_cor_joined %>%
@@ -167,14 +161,14 @@ mean_cor_joined %>%
   group_by(Set) %>%
   summarize(cor = cor(diff, Value))
 
-####check if removal of 1 element changes correlations for fixed installations
+# Check if removal of 1 element changes correlations for fixed installations
 correlations_one_out <- correlation_one_out_diff("fixed",
                                                  mean_cor_joined)
 
 correlations_one_out %>%
   ggplot(aes(x = Name, y = Cor)) + geom_bar(stat = "identity")
 
-####check if removal of 1 element changes correlations for fixed installations
+# Check if removal of 1 element changes correlations for fixed installations
 correlations_one_out <- correlation_one_out_diff("tracking",
                                                  mean_cor_joined)
 

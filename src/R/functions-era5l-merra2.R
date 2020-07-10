@@ -70,7 +70,7 @@ cluster_ts <-
     manual_assignment <- c("LAS MOLLACAS")
     
     non_tracking <- ret %>%
-      filter(Cluster %in% c(1, 4)) %>%
+      filter(Cluster %in% c(1, 3)) %>%
       dplyr::select(Location) %>%
       unique() %>%
       unlist() %>%
@@ -79,7 +79,7 @@ cluster_ts <-
     
     #2, 4, 5
     tracking <- ret %>%
-      filter(Cluster %in% c(2, 3)) %>%
+      filter(Cluster %in% c(2, 4)) %>%
       dplyr::select(Location) %>%
       unique() %>%
       unlist() %>%
