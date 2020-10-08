@@ -477,14 +477,14 @@ trans<-function(x){
   return(x^(1/1.2))
 }
 
-density_plot<-function(files=c("timeseries_capacity_factors_pv_optimal_era5l.csv",
-                               "timeseries_capacity_factors_pv_tracking_era5l.csv",
-                               "timeseries_capacity_factors_pv_optimal_merra2.csv",
-                               "timeseries_capacity_factors_pv_tracking_merra2.csv",
-                               "repo/PV_from_era5/results/tables/pv_cf_reference_chile.csv",
-                               "repo/PV_from_era5/results/tables/pv_cf_reference_chile.csv"),
+density_plot<-function(files=c("../../data/timeseries_capacity_factors_pv_optimal_era5l.csv",
+                               "../../data/timeseries_capacity_factors_pv_tracking_era5l.csv",
+                               "../../data/timeseries_capacity_factors_pv_optimal_merra2.csv",
+                               "../../data/timeseries_capacity_factors_pv_tracking_merra2.csv",
+                               "../../data/pv_cf_reference_chile.csv",
+                               "../../data/pv_cf_reference_chile.csv"),
                        selection,
-                       file_name="Figure-4-density.png"){
+                       file_name="../../figures/Figure-4-density.png"){
   
   
   

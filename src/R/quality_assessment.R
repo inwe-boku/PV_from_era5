@@ -4,6 +4,7 @@ library(tidyverse)
 
 library(dtw)
 
+
 source("functions.R")
 
 #### load data ####
@@ -89,17 +90,12 @@ selection<-tibble(Location=c(erroneous,tracking,non_tracking),
 
 selection %>% group_by(Type) %>% summarize(s=n())
 
-t<-quality_assess_selection(selection)
-
 ts<-read_csv("../../data/pv_cf_reference_chile.csv", col_types = paste0(c("?", rep("d", 57)),collapse=""))
 names(ts)[1]<-"Time"
 ts<-ts %>% gather(Location, Capacity_Factor, -Time)
 
 
 ###plot examples of classification of errneous
-
-library(lubridate)
-
 loc<-"CARRERA PINTO ETAPA I"
 
 e_loc<-selection %>% filter(Type=="erroneous")

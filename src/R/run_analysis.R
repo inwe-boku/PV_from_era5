@@ -56,21 +56,6 @@ boxplot_comparisons(final_tab_join,
                     c("mbe"),
                     c("Hourly"))
 
-merra2_tracking_file<-"../../data/indicators_merra2_tracking_deseason.csv"
-era5l_tracking_file<-"../../data/indicators_era5l_tracking_deseason.csv"
-merra2_non_tracking_file<-"../../data/indicators_merra2_optimal_deseason.csv"
-era5l_non_tracking_file<-"../../data/indicators_era5l_optimal_deseason.csv"
-
-final_tab_join<-load_indicators(merra2_tracking_file,
-                                era5l_tracking_file,
-                                merra2_non_tracking_file,
-                                era5l_non_tracking_file,
-                                selection)
-
-boxplot_comparisons(final_tab_join,
-                    "../../figures/best_fit_deseasonalized_pv.png")
-
-
 density_plot(selection=selection)
 
 files<-c("../../data/deseason_rad_optimal_era5l.csv",
