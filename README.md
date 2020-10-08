@@ -1,6 +1,9 @@
 # Simulation of multi-annual time series of solar photovoltaic power: is the ERA5-land reanalysis the next big step? 
 This repository contains the scripts necesary to calculate PV electricity generation from ERA5-land data and for the validation against measured PV output data for the paper "Simulation of multi-annual time series of solar photovoltaic power: is the ERA5-land reanalysis the next big step?". The preprint can be found [here](https://arxiv.org/abs/2003.04131) and the full paper, once published here. The code is split in two parts:
 
+## Data download
+In data there is a script to download the necessary input data from Zenodo
+
 ## Python: clean and prepare the official data of PV output, get the necessary variables from the reanalysis data sets, simulation of PV timeseries, and calculation of simulation quality indicators
 Dependencies in Python: os, itertools, xarray, pandas, numpy, pvlib, matplotlib.pyplot, geopandas, glob, tkinter, gc, unidecode, scipy, pathlib (for particularities please see the individual notebooks)
 
@@ -11,6 +14,5 @@ The last two notebooks with the PV output and performance assessment (3_pv_outpu
 ## R: Quality assessment of data, classification and clustering, final figures
 Dependencies in R: tidyverse, irenabpdata, lubridate, dtw
 
-To run the analysis, run script "run_analysis.R".
+To run the analysis, run script "src/R/run_analysis.R".
 
-The script downloads the intermediate results produced by python from Zenodo, classifies installations and creates figures.
