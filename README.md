@@ -16,3 +16,5 @@ Dependencies in R: tidyverse, irenabpdata, lubridate, dtw
 
 To run the analysis, run script "src/R/run_analysis.R".
 
+We gratefully acknowledge support from the European Research Council (“reFUEL” ERC2017-STG 758149).
+
